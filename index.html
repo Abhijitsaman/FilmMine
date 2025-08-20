@@ -1,0 +1,1716 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilmMine</title>
+
+    <!-- Meta Tags for modern look and feel -->
+    <meta name="description" content="FilmMine - A modern movie information web application.">
+    <meta name="theme-color" content="#141414">
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon (Base64 encoded to keep it self-contained) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
+
+<style>
+    /* =================================================================
+       1. CSS RESET & GLOBAL STYLES
+       ================================================================= */
+    :root {
+        --color-primary: #e5b80b; /* A rich gold for accents */
+        --color-background: #141414;
+        --color-surface: #1d1d1d;
+        --color-surface-light: #2a2a2a;
+        --color-text-primary: #ffffff;
+        --color-text-secondary: #a0a0a0;
+        --color-text-dark: #000000;
+        --border-radius: 8px;
+        --font-family: 'Poppins', sans-serif;
+        --transition-speed: 0.3s;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--color-background);
+        color: var(--color-text-primary);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+    }
+
+    a {
+        color: var(--color-primary);
+        text-decoration: none;
+    }
+    
+    /* Custom Scrollbar for a more premium feel */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-surface);
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--color-surface-light);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    /* =================================================================
+       2. UTILITIES & HELPERS
+       ================================================================= */
+    .container {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .hidden {
+        display: none !important;
+    }
+    
+    /* Fade-in animation for loading content */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    /* =================================================================
+       3. SKELETON LOADERS
+       ================================================================= */
+    .skeleton {
+        background-color: var(--color-surface);
+        background: linear-gradient(100deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, 0.05) 50%,
+            rgba(255, 255, 255, 0) 60%) var(--color-surface);
+        background-size: 200% 100%;
+        background-position-x: 180%;
+        animation: 1s shimmer ease-in-out infinite;
+        border-radius: var(--border-radius);
+    }
+    
+    @keyframes shimmer {
+        to { background-position-x: -20%; }
+    }
+
+    /* =================================================================
+       4. HEADER & SEARCH
+       ================================================================= */
+    
+    .app-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(to bottom, rgba(20, 20, 20, 0.9), rgba(20, 20, 20, 0));
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 1000;
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .app-header.scrolled {
+        background-color: var(--color-background);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    
+    .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        cursor: pointer;
+        user-select: none;
+    }
+    
+    .search-container {
+        position: relative;
+        width: 300px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--color-surface-light);
+        border-radius: var(--border-radius);
+        background-color: rgba(0, 0, 0, 0.5);
+        color: var(--color-text-primary);
+        font-family: var(--font-family);
+        font-size: 1rem;
+        transition: all var(--transition-speed) ease;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        background-color: rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 10px rgba(229, 184, 11, 0.3);
+    }
+    
+    .search-results {
+        position: absolute;
+        top: 110%;
+        left: 0;
+        width: 100%;
+        background-color: var(--color-surface);
+        border-radius: var(--border-radius);
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1001;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    }
+    
+    .search-result-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem;
+        cursor: pointer;
+        transition: background-color var(--transition-speed) ease;
+    }
+
+    .search-result-item:hover, .search-result-item.selected {
+        background-color: var(--color-surface-light);
+    }
+    
+    .search-result-item img {
+        width: 40px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-right: 1rem;
+    }
+
+    .search-result-item .info h4 {
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .search-result-item .info p {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+    }
+
+
+    /* =================================================================
+       5. MAIN CONTENT & VIEWS
+       ================================================================= */
+    main {
+        padding-top: 80px; /* Space for fixed header */
+    }
+    
+    .view {
+        display: none;
+        animation: fadeIn 0.5s ease-out; /* Add fade-in to all views */
+    }
+
+    .view.active {
+        display: block;
+    }
+
+    .page-header {
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--color-surface-light);
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 600;
+    }
+    .back-button {
+        background: var(--color-surface-light);
+        color: var(--color-text-primary);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: background-color var(--transition-speed);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .back-button:hover {
+        background: var(--color-primary);
+        color: var(--color-text-dark);
+    }
+
+
+    /* =================================================================
+       6. HOME VIEW: FEATURED & CAROUSELS
+       ================================================================= */
+    
+    /* --- Featured Movie --- */
+    .featured {
+        height: 80vh;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        color: white;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .featured-backdrop {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+    }
+
+    .featured-backdrop-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to top, rgba(20, 20, 20, 1) 10%, rgba(20, 20, 20, 0.2) 50%, rgba(20, 20, 20, 0.8) 100%);
+        z-index: -1;
+    }
+
+    .featured-content {
+        max-width: 50%;
+    }
+
+    .featured-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+
+    .featured-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .featured-rating {
+        background-color: var(--color-primary);
+        color: var(--color-text-dark);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    .featured-overview {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #e0e0e0;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        border: none;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: var(--font-family);
+        cursor: pointer;
+        transition: all var(--transition-speed) ease;
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-secondary {
+        background-color: var(--color-surface-light);
+        color: var(--color-text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: #444;
+    }
+
+
+    .btn-primary {
+        background-color: var(--color-primary);
+        color: var(--color-text-dark);
+    }
+    
+    .btn-primary:hover {
+        background-color: #ffde59;
+        transform: scale(1.05);
+    }
+
+    /* --- Featured Skeleton --- */
+    .featured.skeleton-container {
+        background-color: var(--color-surface);
+    }
+    .featured-content.skeleton-container .skeleton {
+        margin-bottom: 1rem;
+    }
+    .featured-title.skeleton { height: 48px; width: 60%; }
+    .featured-info.skeleton { height: 24px; width: 30%; }
+    .featured-overview.skeleton { height: 72px; width: 100%; }
+    .btn.skeleton { height: 48px; width: 150px; }
+
+
+    /* --- Carousels --- */
+    .carousel-section {
+        margin-bottom: 3rem;
+    }
+
+    .carousel-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding: 0 2rem;
+    }
+
+    .carousel {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 2rem 1rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        scroll-snap-type: x mandatory;
+    }
+    .carousel::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+    
+    .movie-card {
+        flex: 0 0 auto;
+        width: 180px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--border-radius);
+        transition: transform var(--transition-speed) ease;
+        scroll-snap-align: start;
+    }
+    
+    .movie-card:hover {
+        transform: scale(1.05);
+        z-index: 10;
+    }
+
+    .movie-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .movie-card .overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+        padding: 1rem 0.5rem 0.5rem;
+        opacity: 0;
+        transition: opacity var(--transition-speed) ease;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    .movie-card:hover .overlay {
+        opacity: 1;
+    }
+    
+    .movie-card-rating {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: var(--color-primary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    /* Carousel Skeleton */
+    .carousel.skeleton-container {
+        cursor: default;
+    }
+    .movie-card.skeleton {
+        height: 270px;
+        background-color: var(--color-surface);
+    }
+
+    /* =================================================================
+       7. DETAILS VIEW & NEW FEATURE STYLES
+       ================================================================= */
+    .details-header {
+        height: 70vh;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+    }
+    
+    .details-backdrop {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        object-fit: cover; z-index: -1;
+    }
+    .details-backdrop-overlay {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background: linear-gradient(to top, var(--color-background) 20%, transparent 100%);
+        z-index: -1;
+    }
+
+    .details-content {
+        display: flex;
+        gap: 2rem;
+        padding: 2rem;
+        align-items: flex-end;
+    }
+    
+    .details-poster {
+        width: 200px;
+        height: 300px;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+    }
+
+    .details-info h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .details-meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        color: var(--color-text-secondary);
+    }
+    
+    .details-genres span {
+        background-color: var(--color-surface-light);
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+    }
+    
+    .details-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .details-rating .star {
+        color: var(--color-primary);
+        font-size: 1.2rem;
+    }
+    
+    .details-body {
+        padding: 2rem;
+    }
+    
+    .details-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .details-section {
+        margin-bottom: 3rem;
+    }
+    .details-section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--color-primary);
+        padding-left: 0.75rem;
+    }
+
+    .overview-text {
+        line-height: 1.7;
+        color: var(--color-text-secondary);
+        max-width: 80ch; /* Improve readability */
+    }
+
+    /* --- Watch Providers --- */
+    .watch-providers-list {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+    .watch-providers-list a {
+        display: block;
+        transition: transform var(--transition-speed);
+    }
+    .watch-providers-list a:hover {
+        transform: scale(1.1);
+    }
+    .provider-logo {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--border-radius);
+        object-fit: cover;
+    }
+
+    /* --- Movie Info Grid --- */
+    .movie-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+        background-color: var(--color-surface);
+        padding: 1rem;
+        border-radius: var(--border-radius);
+    }
+    .info-label {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    .info-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+    }
+    
+    /* --- Media Gallery --- */
+    .media-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--color-surface-light);
+    }
+    .media-tab {
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all var(--transition-speed);
+    }
+    .media-tab.active {
+        color: var(--color-primary);
+        border-bottom-color: var(--color-primary);
+    }
+    .media-content {
+        display: none;
+    }
+    .media-content.active {
+        display: block;
+    }
+    .image-gallery, .video-gallery {
+        display: grid;
+        gap: 1rem;
+    }
+    .image-gallery { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+    .video-gallery { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+    .gallery-image {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: transform var(--transition-speed);
+    }
+    .gallery-image:hover { transform: scale(1.03); }
+
+    .video-thumbnail {
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+        border-radius: var(--border-radius);
+    }
+    .video-thumbnail img {
+        width: 100%;
+        display: block;
+        transition: transform var(--transition-speed);
+    }
+    .video-thumbnail:hover img { transform: scale(1.05); }
+    .video-thumbnail .play-icon {
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px; height: 60px;
+        background-color: rgba(0,0,0,0.6);
+        border-radius: 50%;
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        transition: background-color var(--transition-speed);
+    }
+    .video-thumbnail:hover .play-icon { background-color: var(--color-primary); color: var(--color-text-dark); }
+    
+    /* --- Cast & Crew --- */
+    .cast-carousel {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+        padding-bottom: 1rem;
+    }
+    .cast-carousel::-webkit-scrollbar { display: none; }
+    .cast-carousel { scrollbar-width: none; }
+    
+    .cast-card {
+        flex: 0 0 120px;
+        text-align: center;
+        cursor: pointer;
+        transition: transform var(--transition-speed);
+    }
+    .cast-card:hover { transform: scale(1.05); }
+
+    .cast-card img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+        background-color: var(--color-surface);
+    }
+    .cast-card-name { font-weight: 500; }
+    .cast-card-character {
+        font-size: 0.8rem;
+        color: var(--color-text-secondary);
+    }
+
+    /* --- Details Skeleton --- */
+    .details-header.skeleton-container { background-color: var(--color-surface); }
+    .details-poster.skeleton { width: 200px; height: 300px; }
+    .details-info .skeleton { margin-bottom: 1rem; }
+    .details-info h1.skeleton { height: 40px; width: 300px; }
+    .details-meta.skeleton { height: 24px; width: 400px; }
+    .details-body .btn.skeleton { width: 180px; height: 48px; }
+    .details-section-title.skeleton { width: 200px; height: 30px; }
+    .overview-text.skeleton { height: 100px; width: 100%; }
+    .cast-card.skeleton { height: 180px; }
+    
+
+    /* =================================================================
+       8. FULL CREDITS VIEW
+       ================================================================= */
+    .credits-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1.5rem;
+    }
+    .credit-card {
+        text-align: center;
+        cursor: pointer;
+        transition: transform var(--transition-speed);
+    }
+    .credit-card:hover { transform: scale(1.05); }
+    .credit-card img {
+        width: 140px;
+        height: 210px;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        margin-bottom: 0.75rem;
+        background-color: var(--color-surface);
+    }
+    .credit-card-name { font-weight: 500; font-size: 1rem; }
+    .credit-card-role { color: var(--color-text-secondary); font-size: 0.9rem; }
+
+
+    /* =================================================================
+       9. ACTOR DETAILS VIEW
+       ================================================================= */
+    .actor-details-layout {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    .actor-photo {
+        width: 300px;
+        height: 450px;
+        object-fit: cover;
+        border-radius: var(--border-radius);
+        flex-shrink: 0;
+    }
+    .actor-info h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+    .actor-bio {
+        margin-top: 1.5rem;
+    }
+    .actor-bio h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+    }
+    .actor-bio p {
+        line-height: 1.7;
+        color: var(--color-text-secondary);
+    }
+    .actor-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1rem;
+    }
+
+    /* =================================================================
+       10. MODALS (TRAILER & IMAGE LIGHTBOX)
+       ================================================================= */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+    }
+    
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        position: relative;
+        width: 90%;
+        max-width: 960px;
+        background-color: var(--color-background);
+        border-radius: var(--border-radius);
+        transform: scale(0.9);
+        transition: transform var(--transition-speed) ease;
+    }
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+    }
+
+    .modal-video-wrapper {
+        position: relative;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
+        height: 0;
+        overflow: hidden;
+    }
+    
+    .modal-video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+    
+    .modal-close-btn {
+        position: absolute;
+        top: -40px;
+        right: 0;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 2.5rem;
+        cursor: pointer;
+        line-height: 1;
+    }
+    
+    .no-trailer-message {
+        padding: 4rem 2rem;
+        text-align: center;
+        font-size: 1.2rem;
+        color: var(--color-text-secondary);
+    }
+    
+    /* --- Image Lightbox Specific --- */
+    .lightbox-content {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+    .lightbox-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: var(--border-radius);
+    }
+
+    /* =================================================================
+       11. LOADING & ERROR STATES
+       ================================================================= */
+    .loader-overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-color: var(--color-background);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
+    }
+    
+    .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid var(--color-surface-light);
+        border-top-color: var(--color-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .error-message {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #d32f2f;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius);
+        z-index: 10000;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+    }
+    .error-message.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+
+    /* =================================================================
+       12. RESPONSIVE DESIGN
+       ================================================================= */
+    @media (max-width: 768px) {
+        .container, .app-header, .carousel, .carousel-title, .details-body {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        .logo { font-size: 1.5rem; }
+        .search-container { width: 200px; }
+
+        .featured { height: 60vh; align-items: flex-end; }
+        .featured-content { max-width: 100%; }
+        .featured-title { font-size: 2rem; }
+        .featured-overview { font-size: 0.9rem; -webkit-line-clamp: 2; }
+        .btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+
+        .details-header { height: auto; }
+        .details-content { flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding-top: 5rem; }
+        .details-poster { width: 150px; height: 225px; }
+        .details-info h1 { font-size: 1.8rem; }
+        .details-meta { justify-content: center; }
+
+        .actor-details-layout { flex-direction: column; align-items: center; text-align: center; }
+        .actor-photo { width: 200px; height: 300px; }
+        .actor-info h1 { font-size: 2rem; }
+    }
+
+    @media (max-width: 480px) {
+        .search-container {
+            position: static;
+            width: 100%;
+            margin-top: 0.5rem;
+            order: 3;
+        }
+        .app-header {
+            flex-wrap: wrap;
+        }
+        .search-results {
+            width: calc(100% - 2rem); /* Account for padding */
+            left: 1rem;
+        }
+
+        .movie-card { width: 140px; }
+        .credits-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
+        .credit-card img { width: 120px; height: 180px; }
+    }
+</style>
+</head>
+<body>
+
+<!-- App Header -->
+<header class="app-header">
+    <h1 class="logo" role="button" aria-label="Go to Home Page">FilmMine</h1>
+    <div class="search-container">
+        <input type="search" class="search-input" placeholder="Search for a movie..." aria-label="Search for a movie">
+        <div class="search-results hidden"></div>
+    </div>
+</header>
+
+<!-- Main Content Area -->
+<main>
+    <!-- Home View -->
+    <section id="home-view" class="view active">
+        <!-- Featured Movie Section -->
+        <div id="featured-movie">
+            <!-- Skeleton Loader for Featured -->
+            <div class="featured skeleton-container">
+                <div class="featured-content skeleton-container">
+                    <div class="featured-title skeleton"></div>
+                    <div class="featured-info skeleton"></div>
+                    <div class="featured-overview skeleton"></div>
+                    <button class="btn skeleton"></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Movie Carousels -->
+        <div id="carousels">
+            <div class="carousel-section">
+                <h2 class="carousel-title">Trending Now</h2>
+                <div class="carousel skeleton-container" id="trending-carousel"></div>
+            </div>
+            <div class="carousel-section">
+                <h2 class="carousel-title">Top Rated</h2>
+                <div class="carousel skeleton-container" id="top-rated-carousel"></div>
+            </div>
+            <div class="carousel-section">
+                <h2 class="carousel-title">Upcoming</h2>
+                <div class="carousel skeleton-container" id="upcoming-carousel"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Movie Details View -->
+    <section id="details-view" class="view"></section>
+
+    <!-- [NEW] Full Cast & Crew View -->
+    <section id="credits-view" class="view"></section>
+
+    <!-- [NEW] Actor Details View -->
+    <section id="actor-view" class="view"></section>
+
+</main>
+
+<!-- Trailer Modal -->
+<div class="modal-overlay" id="trailer-modal">
+    <div class="modal-content">
+        <button class="modal-close-btn" aria-label="Close trailer modal">&times;</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+<!-- [NEW] Image Lightbox Modal -->
+<div class="modal-overlay" id="lightbox-modal">
+    <div class="modal-content lightbox-content">
+        <button class="modal-close-btn" aria-label="Close image lightbox">&times;</button>
+        <img id="lightbox-image" src="" alt="Gallery image">
+    </div>
+</div>
+
+
+<!-- Global Loader -->
+<div class="loader-overlay" id="loader">
+    <div class="spinner"></div>
+</div>
+
+<!-- Error Message Display -->
+<div class="error-message" id="error-container"></div>
+
+
+<script>
+// Self-invoking function to encapsulate the entire application and avoid polluting the global scope.
+(function() {
+    'use strict';
+
+    // =================================================================
+    // 1. CONFIGURATION & STATE
+    // =================================================================
+    const config = {
+        API_KEY: '355b0b1ef884790027aba47261a92c25', // Your provided API Key
+        BASE_URL: 'https://api.themoviedb.org/3',
+        IMAGE_BASE_URL: 'https://image.tmdb.org/t/p/',
+        IMAGE_SIZES: {
+            poster: 'w500',
+            backdrop: 'w1280',
+            profile: 'h632', // Used for actor details page
+            cast: 'w185',    // Used for cast cards
+            logo: 'w92'      // Used for provider logos
+        },
+        PLACEHOLDER_IMAGE: 'https://via.placeholder.com/500x750.png?text=No+Image',
+        PLACEHOLDER_PROFILE: 'https://via.placeholder.com/185x278.png?text=No+Image'
+    };
+
+    const cache = {
+        genres: null,
+    };
+
+    // =================================================================
+    // 2. DOM ELEMENTS
+    // =================================================================
+    const elements = {
+        header: document.querySelector('.app-header'),
+        logo: document.querySelector('.logo'),
+        searchInput: document.querySelector('.search-input'),
+        searchResults: document.querySelector('.search-results'),
+        main: document.querySelector('main'),
+        homeView: document.getElementById('home-view'),
+        detailsView: document.getElementById('details-view'),
+        creditsView: document.getElementById('credits-view'), // New view
+        actorView: document.getElementById('actor-view'),     // New view
+        featuredMovie: document.getElementById('featured-movie'),
+        trendingCarousel: document.getElementById('trending-carousel'),
+        topRatedCarousel: document.getElementById('top-rated-carousel'),
+        upcomingCarousel: document.getElementById('upcoming-carousel'),
+        trailerModal: document.getElementById('trailer-modal'),
+        modalBody: document.getElementById('modal-body'),
+        lightboxModal: document.getElementById('lightbox-modal'), // New modal
+        lightboxImage: document.getElementById('lightbox-image'), // New modal image
+        loader: document.getElementById('loader'),
+        errorContainer: document.getElementById('error-container')
+    };
+    
+    let searchResultIndex = -1;
+
+    // =================================================================
+    // 3. API HELPER FUNCTIONS
+    // =================================================================
+
+    /**
+     * Fetches data from the TMDb API.
+     * @param {string} endpoint - The API endpoint to call.
+     * @returns {Promise<Object>} - The JSON response from the API.
+     */
+    async function apiFetch(endpoint) {
+        const separator = endpoint.includes('?') ? '&' : '?';
+        const url = `${config.BASE_URL}${endpoint}${separator}api_key=${config.API_KEY}&append_to_response=videos,credits,images,watch/providers,similar,collection`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+            return await response.json();
+        } catch (error) {
+            console.error(`Failed to fetch from ${endpoint}:`, error);
+            showError('Could not connect to the movie database.');
+            throw error;
+        }
+    }
+    
+    /**
+     * Fetches the list of all movie genres once and caches it.
+     */
+    async function fetchAndCacheGenres() {
+        if (!cache.genres) {
+            const data = await apiFetch('/genre/movie/list');
+            cache.genres = new Map(data.genres.map(g => [g.id, g.name]));
+        }
+    }
+
+    // =================================================================
+    // 4. UI RENDERING FUNCTIONS
+    // =================================================================
+    
+    function showLoading(show) {
+        elements.loader.style.opacity = show ? '1' : '0';
+        elements.loader.style.pointerEvents = show ? 'auto' : 'none';
+    }
+
+    function showError(message) {
+        elements.errorContainer.textContent = message;
+        elements.errorContainer.classList.add('show');
+        setTimeout(() => {
+            elements.errorContainer.classList.remove('show');
+        }, 5000);
+    }
+
+    async function renderHomePage() {
+        showView('home-view');
+        renderFeaturedSkeleton();
+        renderCarouselSkeletons();
+
+        try {
+            const [trending, topRated, upcoming] = await Promise.all([
+                apiFetch('/trending/movie/week'),
+                apiFetch('/movie/top_rated'),
+                apiFetch('/movie/upcoming')
+            ]);
+            renderFeaturedMovie(trending.results[0]);
+            renderCarousel('trending-carousel', trending.results);
+            renderCarousel('top-rated-carousel', topRated.results);
+            renderCarousel('upcoming-carousel', upcoming.results);
+        } catch (error) {
+            elements.featuredMovie.innerHTML = `<p class="error-message show">Failed to load featured movie.</p>`;
+        }
+    }
+
+    function renderFeaturedSkeleton() {
+        elements.featuredMovie.innerHTML = `
+            <div class="featured skeleton-container">
+                <div class="featured-content container">
+                    <div class="featured-title skeleton"></div>
+                    <div class="featured-info skeleton"></div>
+                    <div class="featured-overview skeleton"></div>
+                    <button class="btn skeleton"></button>
+                </div>
+            </div>`;
+    }
+
+    function renderCarouselSkeletons() {
+        const skeletonCard = `<div class="movie-card skeleton"></div>`;
+        const skeletonHTML = Array(10).fill(skeletonCard).join('');
+        ['trending-carousel', 'top-rated-carousel', 'upcoming-carousel'].forEach(id => {
+            document.getElementById(id).innerHTML = skeletonHTML;
+        });
+    }
+
+    function renderFeaturedMovie(movie) {
+        const backdropUrl = movie.backdrop_path ? `${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.backdrop}${movie.backdrop_path}` : config.PLACEHOLDER_IMAGE;
+        elements.featuredMovie.innerHTML = `
+            <div class="featured fade-in">
+                <img src="${backdropUrl}" class="featured-backdrop" alt="${movie.title}" loading="lazy">
+                <div class="featured-backdrop-overlay"></div>
+                <div class="featured-content container">
+                    <h2 class="featured-title">${movie.title}</h2>
+                    <div class="featured-info">
+                        <span class="featured-rating">★ ${movie.vote_average.toFixed(1)}</span>
+                    </div>
+                    <p class="featured-overview">${movie.overview}</p>
+                    <button class="btn btn-primary" data-movie-id="${movie.id}">View Details</button>
+                </div>
+            </div>`;
+    }
+
+    function renderCarousel(elementId, movies) {
+        const carouselElement = document.getElementById(elementId);
+        if (!carouselElement) return;
+        carouselElement.classList.remove('skeleton-container');
+        carouselElement.innerHTML = movies.map(createMovieCard).join('');
+        setupCarouselDrag(carouselElement);
+    }
+
+    function createMovieCard(movie) {
+        const posterUrl = movie.poster_path ? `${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.poster}${movie.poster_path}` : config.PLACEHOLDER_IMAGE;
+        return `
+            <div class="movie-card" data-movie-id="${movie.id}" role="button" tabindex="0">
+                <img src="${posterUrl}" alt="${movie.title}" loading="lazy">
+                <div class="movie-card-rating">★ ${movie.vote_average.toFixed(1)}</div>
+                <div class="overlay">${movie.title}</div>
+            </div>`;
+    }
+
+    /**
+     * Renders the Movie Details Page with all new features.
+     * @param {number} movieId - The ID of the movie to display.
+     */
+    async function renderDetailsPage(movieId) {
+        showView('details-view');
+        elements.detailsView.innerHTML = createDetailsSkeleton();
+        window.scrollTo(0, 0);
+
+        try {
+            const details = await apiFetch(`/movie/${movieId}`);
+            
+            const backdropUrl = details.backdrop_path ? `${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.backdrop}${details.backdrop_path}` : '';
+            const posterUrl = details.poster_path ? `${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.poster}${details.poster_path}` : config.PLACEHOLDER_IMAGE;
+            const genres = details.genres.map(g => `<span>${g.name}</span>`).join('');
+            const trailer = details.videos.results.find(v => v.site === 'YouTube' && v.type === 'Trailer');
+            const director = details.credits.crew.find(person => person.job === 'Director');
+            
+            const formatCurrency = (amount) => amount === 0 ? 'N/A' : `$${amount.toLocaleString()}`;
+            const formatRuntime = (mins) => !mins ? 'N/A' : `${Math.floor(mins / 60)}h ${mins % 60}m`;
+
+            elements.detailsView.innerHTML = `
+                <div class="details-header fade-in" style="${!backdropUrl && 'background-color: var(--color-surface);'}">
+                    ${backdropUrl ? `<img src="${backdropUrl}" class="details-backdrop" alt="${details.title}">` : ''}
+                    <div class="details-backdrop-overlay"></div>
+                    <div class="details-content container">
+                        <img src="${posterUrl}" class="details-poster" alt="${details.title}">
+                        <div class="details-info">
+                            <h1>${details.title}</h1>
+                            <div class="details-meta">
+                                <span>${details.release_date.substring(0, 4)}</span>
+                                <div class="details-genres">${genres}</div>
+                                <div class="details-rating"><span class="star">★</span><span>${details.vote_average.toFixed(1)}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="details-body container">
+                    <div class="details-actions">
+                        ${trailer ? `<button class="btn btn-primary" data-video-key="${trailer.key}">Watch Trailer</button>` : ''}
+                    </div>
+                    
+                    ${renderWatchProviders(details['watch/providers'])}
+
+                    <div class="details-section">
+                        <h2 class="details-section-title">Plot Summary</h2>
+                        <p class="overview-text">${details.overview || 'No summary available.'}</p>
+                    </div>
+
+                    <div class="details-section">
+                        <h2 class="details-section-title">Movie Info</h2>
+                        <div class="movie-info-grid">
+                            <div class="info-item"><span class="info-label">Release Date</span><span class="info-value">${new Date(details.release_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                            <div class="info-item"><span class="info-label">Runtime</span><span class="info-value">${formatRuntime(details.runtime)}</span></div>
+                            ${director ? `<div class="info-item"><span class="info-label">Director</span><span class="info-value">${director.name}</span></div>` : ''}
+                            ${details.budget > 0 ? `<div class="info-item"><span class="info-label">Budget</span><span class="info-value">${formatCurrency(details.budget)}</span></div>` : ''}
+                            ${details.revenue > 0 ? `<div class="info-item"><span class="info-label">Revenue</span><span class="info-value">${formatCurrency(details.revenue)}</span></div>` : ''}
+                        </div>
+                    </div>
+
+                    ${renderMediaGallery(details.images, details.videos)}
+                    
+                    ${details.belongs_to_collection ? await renderMovieCollection(details.belongs_to_collection.id) : ''}
+                    
+                    <div class="details-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 class="details-section-title" style="margin-bottom: 0;">Cast & Crew</h2>
+                            <button class="btn btn-secondary" data-credits-id="${movieId}">View All</button>
+                        </div>
+                        <div class="cast-carousel">
+                            ${details.credits.cast.slice(0, 15).map(createCastCard).join('')}
+                        </div>
+                    </div>
+
+                    ${details.similar.results.length > 0 ? `
+                    <div class="details-section">
+                        <h2 class="details-section-title">Similar Movies</h2>
+                        <div class="carousel" id="similar-movies-carousel">
+                            ${details.similar.results.map(createMovieCard).join('')}
+                        </div>
+                    </div>` : ''}
+                </div>`;
+            
+            setupCarouselDrag(document.getElementById('similar-movies-carousel'));
+            setupCarouselDrag(document.querySelector('.cast-carousel'));
+
+        } catch (error) {
+            elements.detailsView.innerHTML = `<p class="error-message show">Could not load movie details.</p>`;
+        }
+    }
+
+    /**
+     * [NEW] Renders the "Available on" section for watch providers.
+     * @param {Object} providersData - Data from the API's watch/providers endpoint.
+     * @returns {string} The HTML string for the section.
+     */
+    function renderWatchProviders(providersData) {
+        const providers = providersData?.results?.IN?.flatrate;
+        if (!providers || providers.length === 0) return '';
+        
+        const providerLogos = providers.map(p => `
+            <a href="${providersData.results.IN.link}" target="_blank" rel="noopener noreferrer" title="Watch on ${p.provider_name}">
+                <img src="${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.logo}${p.logo_path}" alt="${p.provider_name}" class="provider-logo">
+            </a>`).join('');
+
+        return `
+            <div class="details-section">
+                <h2 class="details-section-title">Available on</h2>
+                <div class="watch-providers-list">${providerLogos}</div>
+            </div>`;
+    }
+
+    /**
+     * [NEW] Renders the media gallery with tabs for images and videos.
+     * @param {Object} images - Image data from the API.
+     * @param {Object} videos - Video data from the API.
+     * @returns {string} The HTML string for the media gallery.
+     */
+    function renderMediaGallery(images, videos) {
+        const backdrops = images.backdrops.slice(0, 10);
+        const clips = videos.results.filter(v => v.site === 'YouTube' && ['Teaser', 'Clip', 'Featurette'].includes(v.type)).slice(0,10);
+
+        if (backdrops.length === 0 && clips.length === 0) return '';
+
+        return `
+            <div class="details-section">
+                <h2 class="details-section-title">Media</h2>
+                <div class="media-tabs">
+                    ${backdrops.length > 0 ? `<div class="media-tab active" data-tab="images">Images (${backdrops.length})</div>` : ''}
+                    ${clips.length > 0 ? `<div class="media-tab ${backdrops.length === 0 ? 'active': ''}" data-tab="videos">Videos (${clips.length})</div>` : ''}
+                </div>
+                ${backdrops.length > 0 ? `
+                <div class="media-content active" id="media-images">
+                    <div class="image-gallery">
+                        ${backdrops.map(img => `<img src="${config.IMAGE_BASE_URL}w780${img.file_path}" alt="Backdrop image" class="gallery-image" data-full-src="${config.IMAGE_BASE_URL}original${img.file_path}">`).join('')}
+                    </div>
+                </div>` : ''}
+                ${clips.length > 0 ? `
+                <div class="media-content ${backdrops.length === 0 ? 'active' : ''}" id="media-videos">
+                    <div class="video-gallery">
+                        ${clips.map(vid => `
+                            <div class="video-thumbnail" data-video-key="${vid.key}">
+                                <img src="https://img.youtube.com/vi/${vid.key}/hqdefault.jpg" alt="${vid.name}">
+                                <div class="play-icon">▶</div>
+                            </div>`).join('')}
+                    </div>
+                </div>` : ''}
+            </div>`;
+    }
+
+    /**
+     * [NEW] Fetches and renders the movie collection section.
+     * @param {number} collectionId - The ID of the movie collection.
+     * @returns {Promise<string>} A promise that resolves to the HTML string.
+     */
+    async function renderMovieCollection(collectionId) {
+        try {
+            const collection = await apiFetch(`/collection/${collectionId}`);
+            return `
+                <div class="details-section">
+                    <h2 class="details-section-title">Part of The ${collection.name}</h2>
+                    <div class="carousel" id="collection-carousel">
+                        ${collection.parts.map(createMovieCard).join('')}
+                    </div>
+                </div>`;
+        } catch (error) {
+            console.error('Failed to fetch collection', error);
+            return '';
+        }
+    }
+    
+    /**
+     * [NEW] Renders the full cast and crew page.
+     * @param {number} movieId - The movie ID.
+     */
+    async function renderFullCreditsPage(movieId) {
+        showView('credits-view');
+        elements.creditsView.innerHTML = `<div class="container"><h1 class="page-title skeleton" style="height: 40px; width: 300px;"></h1></div>`;
+        window.scrollTo(0,0);
+        try {
+            const credits = await apiFetch(`/movie/${movieId}/credits`);
+            const movie = await apiFetch(`/movie/${movieId}`); // To get movie title
+
+            const createCreditCard = (person, roleField) => `
+                <div class="credit-card" data-person-id="${person.id}">
+                    <img src="${person.profile_path ? config.IMAGE_BASE_URL + config.IMAGE_SIZES.cast + person.profile_path : config.PLACEHOLDER_PROFILE}" alt="${person.name}">
+                    <p class="credit-card-name">${person.name}</p>
+                    <p class="credit-card-role">${person[roleField]}</p>
+                </div>
+            `;
+            
+            // Group crew by department
+            const crewByDept = credits.crew.reduce((acc, member) => {
+                (acc[member.department] = acc[member.department] || []).push(member);
+                return acc;
+            }, {});
+
+            elements.creditsView.innerHTML = `
+                <div class="container">
+                    <div class="page-header">
+                        <button class="back-button" data-movie-id="${movieId}">←</button>
+                        <h1 class="page-title">Full Cast & Crew for ${movie.title}</h1>
+                    </div>
+                    
+                    <div class="details-section">
+                        <h2 class="details-section-title">Cast (${credits.cast.length})</h2>
+                        <div class="credits-grid">
+                            ${credits.cast.map(p => createCreditCard(p, 'character')).join('')}
+                        </div>
+                    </div>
+                    
+                    ${Object.entries(crewByDept).map(([dept, members]) => `
+                        <div class="details-section">
+                            <h2 class="details-section-title">${dept} (${members.length})</h2>
+                            <div class="credits-grid">
+                                ${members.map(p => createCreditCard(p, 'job')).join('')}
+                            </div>
+                        </div>`).join('')}
+                </div>`;
+        } catch(error) {
+            elements.creditsView.innerHTML = `<p class="error-message show">Could not load credits.</p>`;
+        }
+    }
+    
+    /**
+     * [NEW] Renders the actor details page.
+     * @param {number} personId - The person's ID.
+     */
+    async function renderActorDetailsPage(personId) {
+        showView('actor-view');
+        elements.actorView.innerHTML = createDetailsSkeleton(); // Reuse a similar skeleton
+        window.scrollTo(0,0);
+        try {
+            const [details, credits] = await Promise.all([
+                apiFetch(`/person/${personId}`),
+                apiFetch(`/person/${personId}/movie_credits`)
+            ]);
+            
+            const age = details.birthday ? new Date(new Date() - new Date(details.birthday)).getFullYear() - 1970 : 'N/A';
+            const knownForMovies = credits.cast.sort((a, b) => b.popularity - a.popularity).slice(0, 15);
+            
+            elements.actorView.innerHTML = `
+                <div class="container">
+                    <div class="page-header">
+                        <button class="back-button" onclick="window.history.back()">←</button>
+                    </div>
+                    <div class="actor-details-layout">
+                        <img src="${details.profile_path ? config.IMAGE_BASE_URL + config.IMAGE_SIZES.profile + details.profile_path : config.PLACEHOLDER_PROFILE}" class="actor-photo" alt="${details.name}">
+                        <div class="actor-info">
+                            <h1>${details.name}</h1>
+                            <div class="actor-meta-grid">
+                                <div class="info-item"><span class="info-label">Known For</span><span class="info-value">${details.known_for_department}</span></div>
+                                ${details.birthday ? `<div class="info-item"><span class="info-label">Birthday</span><span class="info-value">${new Date(details.birthday).toLocaleDateString('en-US', {dateStyle: 'long'})} (Age ${age})</span></div>` : ''}
+                                ${details.place_of_birth ? `<div class="info-item"><span class="info-label">Place of Birth</span><span class="info-value">${details.place_of_birth}</span></div>` : ''}
+                            </div>
+                            <div class="actor-bio">
+                                <h3>Biography</h3>
+                                <p>${details.biography || 'No biography available.'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="details-section">
+                        <h2 class="details-section-title">Known For</h2>
+                        <div class="carousel">
+                            ${knownForMovies.map(createMovieCard).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            setupCarouselDrag(document.querySelector('.actor-details-layout + .details-section .carousel'));
+
+        } catch (error) {
+            elements.actorView.innerHTML = `<p class="error-message show">Could not load actor details.</p>`;
+        }
+    }
+
+    function createDetailsSkeleton() {
+        return `<div class="details-header skeleton-container"><div class="details-content container"><div class="details-poster skeleton"></div><div class="details-info"><h1 class="skeleton"></h1><div class="details-meta skeleton"></div></div></div></div><div class="details-body container"><div class="btn skeleton"></div><div class="details-section"><h2 class="details-section-title skeleton"></h2><p class="overview-text skeleton"></p></div></div>`;
+    }
+
+    function createCastCard(member) {
+        const profileUrl = member.profile_path ? `${config.IMAGE_BASE_URL}${config.IMAGE_SIZES.cast}${member.profile_path}` : config.PLACEHOLDER_PROFILE;
+        return `<div class="cast-card" data-person-id="${member.id}"><img src="${profileUrl}" alt="${member.name}" loading="lazy"><p class="cast-card-name">${member.name}</p><p class="cast-card-character">${member.character}</p></div>`;
+    }
+
+    // =================================================================
+    // 5. COMPONENT LOGIC (Search, Modal, Carousel)
+    // =================================================================
+    function setupSearch() {
+        const debouncedSearch = debounce(async (query) => {
+            if (query.length < 2) {
+                elements.searchResults.classList.add('hidden');
+                return;
+            }
+            const data = await apiFetch(`/search/movie?query=${encodeURIComponent(query)}`);
+            renderSearchResults(data.results);
+        }, 300);
+
+        elements.searchInput.addEventListener('input', e => debouncedSearch(e.target.value));
+        elements.searchInput.addEventListener('keydown', handleSearchKeyboardNav);
+        document.addEventListener('click', (e) => {
+            if (!elements.searchContainer.contains(e.target)) {
+                elements.searchResults.classList.add('hidden');
+            }
+        });
+    }
+    
+    function renderSearchResults(movies) {
+        if (movies.length === 0) {
+            elements.searchResults.innerHTML = `<div class="search-result-item" style="padding: 1rem; justify-content: center;"><p>No results found.</p></div>`;
+        } else {
+            elements.searchResults.innerHTML = movies.slice(0, 7).map(movie => `
+                <div class="search-result-item" data-movie-id="${movie.id}" role="button">
+                    <img src="${movie.poster_path ? config.IMAGE_BASE_URL + 'w92' + movie.poster_path : config.PLACEHOLDER_IMAGE}" alt="${movie.title}">
+                    <div class="info"><h4>${movie.title}</h4><p>${movie.release_date ? movie.release_date.substring(0, 4) : 'N/A'}</p></div>
+                </div>`).join('');
+        }
+        elements.searchResults.classList.remove('hidden');
+        searchResultIndex = -1;
+    }
+    
+    function handleSearchKeyboardNav(e) {
+        const items = elements.searchResults.querySelectorAll('.search-result-item[data-movie-id]');
+        if (items.length === 0) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            searchResultIndex = (searchResultIndex + 1) % items.length;
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            searchResultIndex = (searchResultIndex - 1 + items.length) % items.length;
+        } else if (e.key === 'Enter' && searchResultIndex > -1) {
+            e.preventDefault();
+            items[searchResultIndex].click();
+        } else if (e.key === 'Escape') {
+            elements.searchResults.classList.add('hidden');
+        }
+        items.forEach((item, index) => item.classList.toggle('selected', index === searchResultIndex));
+    }
+
+    function openTrailerModal(videoKey) {
+        elements.modalBody.innerHTML = videoKey ?
+            `<div class="modal-video-wrapper"><iframe src="https://www.youtube.com/embed/${videoKey}?autoplay=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>` :
+            `<div class="no-trailer-message">No trailer found.</div>`;
+        elements.trailerModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTrailerModal() {
+        elements.trailerModal.classList.remove('active');
+        elements.modalBody.innerHTML = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    function openLightbox(src) {
+        elements.lightboxImage.src = src;
+        elements.lightboxModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeLightbox() {
+        elements.lightboxModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+    }
+    
+    function setupCarouselDrag(carousel) {
+        if (!carousel) return;
+        let isDown = false, startX, scrollLeft;
+        carousel.addEventListener('mousedown', (e) => { isDown = true; carousel.style.cursor = 'grabbing'; startX = e.pageX - carousel.offsetLeft; scrollLeft = carousel.scrollLeft; });
+        carousel.addEventListener('mouseleave', () => { isDown = false; carousel.style.cursor = 'grab'; });
+        carousel.addEventListener('mouseup', () => { isDown = false; carousel.style.cursor = 'grab'; });
+        carousel.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - carousel.offsetLeft; carousel.scrollLeft = scrollLeft - (x - startX) * 2; });
+        carousel.style.cursor = 'grab';
+    }
+
+    // =================================================================
+    // 6. ROUTER & NAVIGATION
+    // =================================================================
+    
+    function router() {
+        const hash = location.hash;
+        const [path, id] = hash.substring(1).split('/');
+        
+        if (path === 'movie' && id) {
+            renderDetailsPage(id);
+        } else if (path === 'credits' && id) {
+            renderFullCreditsPage(id);
+        } else if (path === 'person' && id) {
+            renderActorDetailsPage(id);
+        } else {
+            renderHomePage();
+        }
+    }
+    
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+    }
+
+    // =================================================================
+    // 7. UTILITY FUNCTIONS
+    // =================================================================
+
+    function debounce(func, delay) {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+
+    // =================================================================
+    // 8. EVENT LISTENERS & INITIALIZATION
+    // =================================================================
+
+    async function init() {
+        showLoading(true);
+
+        window.addEventListener('hashchange', router);
+        elements.logo.addEventListener('click', () => location.hash = '');
+        
+        document.body.addEventListener('click', (e) => {
+            const target = e.target;
+            // Centralized navigation handler
+            const navTarget = target.closest('[data-movie-id], [data-person-id], [data-credits-id]');
+            if (navTarget) {
+                if (navTarget.dataset.movieId) location.hash = `movie/${navTarget.dataset.movieId}`;
+                else if (navTarget.dataset.personId) location.hash = `person/${navTarget.dataset.personId}`;
+                else if (navTarget.dataset.creditsId) location.hash = `credits/${navTarget.dataset.creditsId}`;
+                elements.searchResults.classList.add('hidden');
+                elements.searchInput.value = '';
+            }
+
+            // Media gallery tabs
+            if (target.matches('.media-tab')) {
+                const parent = target.closest('.details-section');
+                parent.querySelectorAll('.media-tab, .media-content').forEach(el => el.classList.remove('active'));
+                target.classList.add('active');
+                parent.querySelector(`#media-${target.dataset.tab}`).classList.add('active');
+            }
+            
+            // Video and image clicks
+            const videoKey = target.closest('[data-video-key]')?.dataset.videoKey;
+            if (videoKey) openTrailerModal(videoKey);
+
+            const imgSrc = target.closest('[data-full-src]')?.dataset.fullSrc;
+            if (imgSrc) openLightbox(imgSrc);
+        });
+
+        // Modal closing events
+        elements.trailerModal.addEventListener('click', e => (e.target === elements.trailerModal || e.target.closest('.modal-close-btn')) && closeTrailerModal());
+        elements.lightboxModal.addEventListener('click', e => (e.target === elements.lightboxModal || e.target.closest('.modal-close-btn')) && closeLightbox());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                if (elements.trailerModal.classList.contains('active')) closeTrailerModal();
+                if (elements.lightboxModal.classList.contains('active')) closeLightbox();
+            }
+        });
+        
+        window.addEventListener('scroll', () => elements.header.classList.toggle('scrolled', window.scrollY > 10));
+        
+        setupSearch();
+
+        try {
+            await fetchAndCacheGenres();
+            router();
+        } catch (error) {
+            elements.main.innerHTML = `<p class="error-message show" style="position: static; transform: none;">FilmMine could not start. Please refresh the page.</p>`;
+        } finally {
+            showLoading(false);
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', init);
+
+})();
+</script>
+</body>
+</html>
